@@ -1,0 +1,112 @@
+{"properties": [
+  {
+    "name": "base.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'base.media.folder.path'"
+  },
+  {
+    "name": "profile.photos.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'profile.photos.media.folder.path'"
+  },
+  {
+    "name": "stories.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'stories.media.folder.path'"
+  },
+  {
+    "name": "others.stories.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'others.stories.media.folder.path'"
+  },
+  {
+    "name": "videos.stories.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'videos.stories.media.folder.path'"
+  },
+  {
+    "name": "photos.stories.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'photos.stories.media.folder.path'"
+  },
+  {
+    "name": "posts.content.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'posts.content.media.folder.path'"
+  },
+  {
+    "name": "videos.posts.content.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'videos.posts.content.media.folder.path'"
+  },
+  {
+    "name": "photos.posts.content.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'photos.posts.content.media.folder.path'"
+  },
+  {
+    "name": "reels.posts.content.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'reels.posts.content.media.folder.path'"
+  },
+  {
+    "name": "others.posts.content.media.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'others.posts.content.media.folder.path'"
+  },
+  {
+    "name": "static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'static.folder.path'"
+  },
+  {
+    "name": "stories.media.folder",
+    "type": "java.lang.String",
+    "description": "A description for 'stories.media.folder'"
+  },
+  {
+    "name": "stories.static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'stories.static.folder.path'"
+  },
+  {
+    "name": "images.stories.static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'images.stories.static.folder.path'"
+  },
+  {
+    "name": "others.stories.static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'others.stories.static.folder.path'"
+  },
+  {
+    "name": "videos.stories.static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'videos.stories.static.folder.path'"
+  },
+  {
+    "name": "profile.photos.static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'profile.photos.static.folder.path'"
+  },
+  {
+    "name": "posts.static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'posts.static.folder.path'"
+  },
+  {
+    "name": "images.posts.static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'images.posts.static.folder.path'"
+  },
+  {
+    "name": "videos.posts.static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'videos.posts.static.folder.path'"
+  },
+  {
+    "name": "others.posts.static.folder.path",
+    "type": "java.lang.String",
+    "description": "A description for 'others.posts.static.folder.path'"
+  }
+]}
