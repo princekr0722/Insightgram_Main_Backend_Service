@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.Insightgram.dto.MessagingRegistrationUserInfo;
 
-@FeignClient("INSIGHTGRAM-MESSAGING-SERVICE")
+@FeignClient(name = "MESSAGING-SERVICE", url = "${MESSAGING_BACKEND_URL:http://localhost:8089}")
 public interface MessagingServiceClient {
 	
 	@PostMapping("/user/chat/register")
