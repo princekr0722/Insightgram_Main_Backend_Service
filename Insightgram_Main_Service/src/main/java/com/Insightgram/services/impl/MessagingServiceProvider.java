@@ -12,7 +12,6 @@ import com.Insightgram.config.security.SpringSecurityContants;
 import com.Insightgram.dto.MessagingRegistrationUserInfo;
 import com.Insightgram.enties.User;
 
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

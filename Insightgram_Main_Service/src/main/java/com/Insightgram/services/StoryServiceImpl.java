@@ -1,14 +1,9 @@
 package com.Insightgram.services;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +17,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.Insightgram.dto.ContentUrlAndType;
 import com.Insightgram.dto.StoryDto;
+import com.Insightgram.dto.UploadedFileDetails;
 import com.Insightgram.dto.UserBasicInfo;
 import com.Insightgram.enties.Story;
 import com.Insightgram.enties.StoryViewer;
@@ -49,6 +46,9 @@ public class StoryServiceImpl implements StoryService {
 
 	@Autowired
 	private UserUtilServices userUtilServices;
+	
+	@Autowired 
+	private CloudinaryService cloudinaryService;
 
 	@Override
 	public StoryDto postStory(MultipartFile file) throws IllegalStateException, IOException {
@@ -56,12 +56,13 @@ public class StoryServiceImpl implements StoryService {
 			throw new IllegalArgumentException(
 					"Media type is unsupported for story. Supported media types are: " + Story.getSupportedMediaType());
 
-		String filePath = saveStoryMediaToFolder(file);
+		UploadedFileDetails uploadedFileDetails = saveStoryMediaToFolder(file);
 
 		User currentUser = userUtilServices.getCurrentUser();
-		Story story = new Story(filePath, file.getContentType(), currentUser);
+		Story story = new Story(uploadedFileDetails, currentUser);
 		Story newStory = storyRepository.save(story);
 
+//		set view count here
 		StoryDto storyDto = new StoryDto(newStory);
 
 		// delete after 24 hours
@@ -78,7 +79,7 @@ public class StoryServiceImpl implements StoryService {
 		}
 		scheduler.schedule(() -> {
 
-			storyRepository.deleteById(story.getStoryId());
+			deleteStory(story.getStoryId());
 
 		}, 24, TimeUnit.HOURS);
 	}
@@ -98,27 +99,9 @@ public class StoryServiceImpl implements StoryService {
 	@Value("${others.stories.static.folder.path}")
 	private String othersStoriesStaticFolderPath;
 
-	private String saveStoryMediaToFolder(MultipartFile file) throws IllegalStateException, IOException {
-
-		String folderPath = "";
-		if (file.getContentType().split("/")[0].equals("video")) {
-			folderPath = videosStoriesStaticFolderPath;
-		} else if (file.getContentType().split("/")[0].equals("image")) {
-			folderPath = imagesStoriesStaticFolderPath;
-		} else {
-			folderPath = othersStoriesStaticFolderPath;
-		}
-
-		Path path = Paths.get(folderPath).toAbsolutePath();
-		File fileDirectory = path.toFile();
-
-		String uniqueFileName = "/insightgram-STORY-" + UUID.randomUUID().toString().substring(0, 20) + "-"
-				+ file.getOriginalFilename();
-
-		String filePath = fileDirectory.getAbsolutePath() + uniqueFileName;
-		file.transferTo(new File(filePath));
-
-		return filePath;
+	private UploadedFileDetails saveStoryMediaToFolder(MultipartFile file) throws IllegalStateException, IOException {
+		UploadedFileDetails uploadedFileDetails = cloudinaryService.uploadMedia(file);
+		return uploadedFileDetails;
 	}
 
 	@Override
@@ -131,16 +114,22 @@ public class StoryServiceImpl implements StoryService {
 
 		deleteStoryViews(storyId);
 
-		String contentPath = storyRepository.getContentPathOfStory(storyId)
+		String publicIdAndContentType = storyRepository.getPublicIdAndContentTypeOfStory(storyId)
 				.orElseThrow(() -> new StoryException("No story found with the Id: " + storyId));
-		deleteStoryContentByPath(contentPath);
-
 		storyRepository.deleteById(storyId);
+		
+		String[] publicIdAndContentTypeArr = publicIdAndContentType.split(",");
+		
+		String publicId = publicIdAndContentTypeArr[0];
+		String contentType = publicIdAndContentTypeArr[1];
+		
+		cloudinaryService.deleteMedia(publicId, contentType);
+
 		return "Story deleted Successful with Id: " + storyId;
 	}
 
 	@Override
-	public ContentByteAndType viewStory(Integer storyId) throws IOException {
+	public ContentUrlAndType viewStory(Integer storyId) throws IOException {
 		Story story = storyRepository.findById(storyId)
 				.orElseThrow(() -> new StoryException("No story exists with Id: " + storyId));
 
@@ -150,8 +139,7 @@ public class StoryServiceImpl implements StoryService {
 		if (!userUtilServices.canInteractWithAnotherUser(currentUser.getUserId(), storyOwner))
 			throw new UserException("Story owner's account is private and you're not a follower of post owner");
 
-		String storyContentPath = story.getStoryContentPath();
-		byte[] media = Files.readAllBytes(new File(storyContentPath).toPath());
+		String storyContentPath = story.getStoryContentURL();
 
 		if (currentUser.getUserId() != storyOwner.getUserId()) {
 			int viewerCount = storyViewerRepository.isAlreadyAViewer(story.getStoryId(), currentUser.getUserId());
@@ -161,7 +149,7 @@ public class StoryServiceImpl implements StoryService {
 			}
 		}
 
-		return new ContentByteAndType(media, story.getStoryContentType());
+		return new ContentUrlAndType(storyContentPath, story.getStoryContentType());
 	}
 
 	@Override
@@ -200,20 +188,20 @@ public class StoryServiceImpl implements StoryService {
 	@Override
 	public List<UserBasicInfo> followingsWhoHaveStories() {
 		String currentUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
-		cleanUpStoriesOlderThanADay();
 		return storyRepository.followingsWhoHaveStories(currentUserIdentifier);
 	}
 
 	@Override
 	public int cleanUpStoriesOlderThanADay() {
-		List<Object[]> storyIdsOlderThan24hrs = storyRepository.get24HrsOldStoryIdsAndPath(LocalDateTime.now());
+		List<Object[]> storyIdsOlderThan24hrs = storyRepository.get24HrsOldStoryIdsPublicIdAndContentType(LocalDateTime.now());
 
 		storyIdsOlderThan24hrs.forEach(objArr -> {
 			Integer storyId = (Integer) objArr[0];
 			deleteStoryViews(storyId);
 
-			String contentPath = (String) objArr[1];
-			deleteStoryContentByPath(contentPath);
+			String publicId = (String) objArr[1];
+			String contentType = (String) objArr[2];
+			cloudinaryService.deleteMedia(publicId, contentType);
 		});
 		int rowDeleted = storyRepository.delete24HrsOldStories(LocalDateTime.now());
 		log.info(rowDeleted + " stories deleted which were older than 24 hours.");
@@ -224,9 +212,4 @@ public class StoryServiceImpl implements StoryService {
 		return storyViewerRepository.deleteViewersOfStory(storyId);
 	}
 
-	private boolean deleteStoryContentByPath(String contentPath) {
-		File file = new File(contentPath);
-		boolean isDeleted = file.delete();
-		return isDeleted;
-	}
 }

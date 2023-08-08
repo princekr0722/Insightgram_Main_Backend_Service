@@ -32,7 +32,8 @@ public class Content {
 	
 	@NotBlank
 	@Column(nullable = false)
-	private String name;
+	@JsonIgnore
+	private String contentPublicId;
 	
 	@NotBlank
 	@Column(nullable = false)
@@ -40,8 +41,7 @@ public class Content {
 	
 	@NotNull
 	@Column(nullable = false)
-	@JsonIgnore
-	private String contentPath;
+	private String contentUrl;
 	
 	@ManyToOne
 	@JoinColumn(name = "post_id")

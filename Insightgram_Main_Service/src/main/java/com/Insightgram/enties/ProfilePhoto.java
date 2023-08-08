@@ -34,12 +34,16 @@ public class ProfilePhoto {
 	@JoinColumn(name = "user_id", nullable = false, unique = true)
 	private User user;
 	
+	@Column(nullable = false, unique = true)
+	@JsonIgnore
+	private String imagePublicId;
+	
 	@Column(nullable = false)
 	private String mediaType;
 	
-	@Column(nullable = false)
-	@JsonIgnore
-	private String imagePath;
+	@Column(nullable = false, unique = true)
+	private String imageUrl;
+	
 	
 	@JsonIgnore
 	@Column(nullable = false)

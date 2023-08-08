@@ -14,10 +14,13 @@ public interface ProfilePhotoRepository extends JpaRepository<ProfilePhoto, Inte
 	Optional<ProfilePhoto> getProfilePhoto(String uniqueIdentifier);
 	
 	@Modifying
-	@Query("UPDATE ProfilePhoto SET imagePath = :newProfilePhotoPath WHERE user.userId = :uniqueIdentifier OR profilePhotoId = :uniqueIdentifier")
-	int changeProfilePhoto(Integer uniqueIdentifier, String newProfilePhotoPath);
+	@Query("UPDATE ProfilePhoto SET imageUrl = :newProfilePhotoUrl WHERE user.userId = :uniqueIdentifier OR profilePhotoId = :uniqueIdentifier")
+	int changeProfilePhoto(Integer uniqueIdentifier, String newProfilePhotoUrl);
 	
 	@Modifying
 	@Query("Delete From ProfilePhoto Where  user.userId = :uniqueIdentifier OR profilePhotoId = :uniqueIdentifier")
 	int deleteProfilePhoto(Integer uniqueIdentifier);
+	
+	@Query("SELECT imageUrl, mediaType FROM ProfilePhoto Where  user.userId = :uniqueIdentifier OR profilePhotoId = :uniqueIdentifier")
+	Optional<String> getProfilePhotoUrlAndType(String uniqueIdentifier);
 }

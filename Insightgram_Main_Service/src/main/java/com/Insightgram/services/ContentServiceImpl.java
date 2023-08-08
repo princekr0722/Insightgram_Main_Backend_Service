@@ -1,20 +1,15 @@
 package com.Insightgram.services;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.Insightgram.dto.ContentUrlAndType;
+import com.Insightgram.dto.UploadedFileDetails;
 import com.Insightgram.enties.Content;
 import com.Insightgram.enties.Post;
 import com.Insightgram.enties.User;
@@ -22,7 +17,6 @@ import com.Insightgram.enties.enums.AccountType;
 import com.Insightgram.repositories.ContentRepository;
 
 import jakarta.transaction.Transactional;
-import reactor.core.publisher.Mono;
 
 @Service
 @Transactional
@@ -30,6 +24,9 @@ public class ContentServiceImpl implements ContentService {
 
 	@Autowired
 	private ContentRepository contentRepository;
+	
+	@Autowired
+	private CloudinaryService cloudinaryService;
 	
 	@Value("${static.folder.path}")
 	private String staticFolderPath;
@@ -49,35 +46,13 @@ public class ContentServiceImpl implements ContentService {
 	@Override
 	public Content createContent(MultipartFile file, Post post) throws IOException {
 		
-		String uniqueFileName = "/insightgram-" + post.getPostType() + "-"
-				+ UUID.randomUUID().toString().substring(0, 20) + "-" + file.getOriginalFilename();
-		
-		String basePath;
-		String filePath;
-		if(file.getContentType().split("/")[0].equals("video")) {
-			
-			basePath = videosPostsStaticFolderPath;
-			
-		}else if(file.getContentType().split("/")[0].equals("image")){
-			
-			basePath = imagesPostsStaticFolderPath;
-			
-		}else {
-			basePath = othersPostsStaticFolderPath;
-		}
-		
-		Path path = Paths.get(basePath).toAbsolutePath();
-		File fileDirectory = path.toFile();
-
-		filePath = fileDirectory.getAbsolutePath() + uniqueFileName;
+		UploadedFileDetails uploadedFileDetails = cloudinaryService.uploadMedia(file);
 		
 		Content content = new Content();
-		content.setName(uniqueFileName);
-		content.setContentType(file.getContentType());
-		content.setContentPath(filePath);
+		content.setContentPublicId(uploadedFileDetails.getPublicId());
+		content.setContentType(uploadedFileDetails.getResourceType());
+		content.setContentUrl(uploadedFileDetails.getUrl());
 		content.setPost(post);
-
-		file.transferTo(new File(filePath));
 
 		return contentRepository.save(content);
 	}
@@ -89,18 +64,16 @@ public class ContentServiceImpl implements ContentService {
 	}
 
 	@Override
-	public ContentByteAndType viewContent(Integer contentId) throws IOException {
+	public ContentUrlAndType viewContent(Integer contentId) throws IOException {
 
-		String[] fileTypeAndPath = getContentFilePath(contentId);
+		ContentUrlAndType contentUrlAndType = getContentFileUrl(contentId);
 
-		byte[] media = Files.readAllBytes(new File(fileTypeAndPath[1]).toPath());
-
-		return new ContentByteAndType(media, fileTypeAndPath[0]);
+		return contentUrlAndType;
 	}
 
-	private String[] getContentFilePath(Integer contentId) {
+	private ContentUrlAndType getContentFileUrl(Integer contentId) {
 		Content content = getContentById(contentId);
-		String filePath;
+		String contentUrl;
 
 		String uniqueUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
 		Post post = content.getPost();
@@ -108,7 +81,7 @@ public class ContentServiceImpl implements ContentService {
 
 		if (postOwner.getAccountType() == AccountType.PUBLIC || uniqueUserIdentifier.equals(postOwner.getUsername())
 				|| uniqueUserIdentifier.equals(postOwner.getMobileNumber())) {
-			filePath = content.getContentPath();
+			contentUrl = content.getContentUrl();
 		} else {
 
 			boolean isfollow = false;
@@ -124,27 +97,38 @@ public class ContentServiceImpl implements ContentService {
 				throw new IllegalArgumentException(
 						"Content owner's account is private, and you're not a follower of the content owner.");
 			else
-				filePath = content.getContentPath();
+				contentUrl = content.getContentUrl();
 		}
 
-		String[] res = new String[] { content.getContentType(), filePath };
+		ContentUrlAndType res = new ContentUrlAndType(contentUrl, content.getContentType());
 		return res;
 	}
 
 	@Override
 	public boolean deleteContent(Content content) {
-		File file = new File(content.getContentPath());
-		return file.delete();
+		String publicId = content.getContentPublicId();
+		String resoureType = content.getContentType();
+		
+		return cloudinaryService.deleteMedia(publicId, resoureType);
 	}
 
-	@Autowired
-	private ResourceLoader resourceLoader;
+//	@Autowired
+//	private ResourceLoader resourceLoader;
 
+//	@Override
+//	public Mono<Resource> streamLiveVideo(Integer contentId) {
+//		String[] fileTypeAndPath = getContentFilePath(contentId);
+//		if (!Content.isValidVideoFormat(fileTypeAndPath[0]))
+//			throw new IllegalArgumentException("Content with Id: " + contentId + " is not a video.");
+//		return Mono.fromSupplier(() -> resourceLoader.getResource("file:" + fileTypeAndPath[1]));
+//	}
+	
 	@Override
-	public Mono<Resource> streamLiveVideo(Integer contentId) {
-		String[] fileTypeAndPath = getContentFilePath(contentId);
-		if (!Content.isValidVideoFormat(fileTypeAndPath[0]))
+	public ContentUrlAndType streamLiveVideo(Integer contentId) {
+		ContentUrlAndType contentUrlAndType = getContentFileUrl(contentId);
+		
+		if (!contentUrlAndType.getMediaType().equals("video"))
 			throw new IllegalArgumentException("Content with Id: " + contentId + " is not a video.");
-		return Mono.fromSupplier(() -> resourceLoader.getResource("file:" + fileTypeAndPath[1]));
+		return contentUrlAndType;
 	}
 }

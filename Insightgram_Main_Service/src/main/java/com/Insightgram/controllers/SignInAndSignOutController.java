@@ -24,7 +24,6 @@ import com.Insightgram.services.UserService;
 import com.Insightgram.services.impl.MessagingServiceProvider;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;

@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.Insightgram.dto.UploadedFileDetails;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,7 +31,11 @@ public class Story {
 	private int storyId;
 	
 	@Column(nullable = false, unique = true)
-	private String storyContentPath;
+	@JsonIgnore
+	private String storyPublicId;
+	
+	@Column(nullable = false, unique = true)
+	private String storyContentURL;
 	
 	@Column(nullable = false)
 	private String storyContentType; 
@@ -42,10 +49,11 @@ public class Story {
 	
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "story")
 	private Set<StoryViewer> viewers = new HashSet<>();
-	
-	public Story(String storyContentPath, String storyContentType, User user) {
-		this.storyContentPath = storyContentPath;
-		this.storyContentType = storyContentType;
+
+	public Story(UploadedFileDetails uploadedFileDetails, User user) {
+		storyPublicId = uploadedFileDetails.getPublicId();
+		storyContentURL = uploadedFileDetails.getUrl();
+		storyContentType = uploadedFileDetails.getResourceType();
 		this.user = user;
 	}
 	
@@ -81,4 +89,5 @@ public class Story {
 		sb.setLength(sb.length()-2);
 		return sb.toString();
 	}
+
 }

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.Insightgram.dto.ContentUrlAndType;
 import com.Insightgram.dto.StoryDto;
 import com.Insightgram.dto.UserBasicInfo;
 import com.Insightgram.models.PageOf;
-import com.Insightgram.services.ContentByteAndType;
 import com.Insightgram.services.StoryService;
 
 @RestController
@@ -40,11 +39,10 @@ public class StoryController {
 	}
 	
 	@GetMapping("/story/{storyId}")
-	ResponseEntity<?> viewStory(@PathVariable Integer storyId) throws IOException{
-		ContentByteAndType byteAndType = storyService.viewStory(storyId);
+	ResponseEntity<String> viewStory(@PathVariable Integer storyId) throws IOException{
+		ContentUrlAndType urlAndType = storyService.viewStory(storyId);
 		return ResponseEntity.status(HttpStatus.OK)
-				.contentType(MediaType.valueOf(byteAndType.getMediaType()))
-				.body(byteAndType.getMediaBytes());
+				.body(urlAndType.getMediaUrl());
 	}
 	
 	@GetMapping("/user/{userId}/stories")

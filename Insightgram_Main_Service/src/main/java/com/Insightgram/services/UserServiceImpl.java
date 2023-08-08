@@ -26,7 +26,6 @@ import com.Insightgram.entities.forms.UserCreationForm;
 import com.Insightgram.exceptions.UserException;
 import com.Insightgram.models.PageOf;
 import com.Insightgram.repositories.UserRepository;
-import com.Insightgram.services.impl.MessagingServiceProvider;
 import com.Insightgram.utils.Urls;
 
 import jakarta.transaction.Transactional;
@@ -47,9 +46,6 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private PostService postService;
-	
-	@Autowired
-	private MessagingServiceProvider  messagingServiceProvider;
 
 	@Override
 	@Transactional

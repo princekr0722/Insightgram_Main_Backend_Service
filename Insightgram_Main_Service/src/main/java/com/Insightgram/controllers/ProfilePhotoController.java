@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.Insightgram.services.ContentByteAndType;
+import com.Insightgram.dto.ContentUrlAndType;
 import com.Insightgram.services.ProfilePhotoService;
 
 @RestController
@@ -27,27 +26,24 @@ public class ProfilePhotoController {
 		private ProfilePhotoService profilePhotoService;
 		
 		@PostMapping("/user/profilePhoto")
-		public ResponseEntity<?> addProfilePhoto(@RequestParam MultipartFile profilePhoto) throws IllegalStateException, IOException{
-			byte[] profilePhotoBytes = profilePhotoService.addProfilePhoto(profilePhoto);
+		public ResponseEntity<String> addProfilePhoto(@RequestParam MultipartFile profilePhoto) throws IllegalStateException, IOException{
+			String profilePhotoUrl = profilePhotoService.addProfilePhoto(profilePhoto);
 			return ResponseEntity.status(HttpStatus.OK)
-					.contentType(MediaType.valueOf(profilePhoto.getContentType()))
-					.body(profilePhotoBytes);
+					.body(profilePhotoUrl);
 		}
 		
 		@PutMapping("user/profilePhoto")
-		public ResponseEntity<?> changeProfilePhoto(@RequestParam MultipartFile profilePhoto) throws IllegalStateException, IOException{
-			byte[] profilePhotoBytes = profilePhotoService.changeProfilePhoto(profilePhoto);
+		public ResponseEntity<String> changeProfilePhoto(@RequestParam MultipartFile profilePhoto) throws IllegalStateException, IOException{
+			String profilePhotoUrl = profilePhotoService.changeProfilePhoto(profilePhoto);
 			return ResponseEntity.status(HttpStatus.OK)
-					.contentType(MediaType.valueOf(profilePhoto.getContentType()))
-					.body(profilePhotoBytes);
+					.body(profilePhotoUrl);
 		}
 		
 		@GetMapping("/user/{uniqueIdentifier}/profilePhoto")
-		public ResponseEntity<?> viewProfilePhoto(@PathVariable String uniqueIdentifier) throws IOException{
-			ContentByteAndType contentByteAndType = profilePhotoService.viewProfilePhoto(uniqueIdentifier);
+		public ResponseEntity<String> viewProfilePhoto(@PathVariable String uniqueIdentifier) throws IOException{
+			ContentUrlAndType contentUrlAndType = profilePhotoService.viewProfilePhoto(uniqueIdentifier);
 			return ResponseEntity.status(HttpStatus.OK)
-					.contentType(MediaType.valueOf(contentByteAndType.getMediaType()))
-					.body(contentByteAndType.getMediaBytes());
+					.body(contentUrlAndType.getMediaUrl());
 		}
 		
 		@DeleteMapping("user/profilePhoto")

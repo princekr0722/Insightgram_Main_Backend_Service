@@ -1,6 +1,5 @@
 package com.Insightgram.exceptions;
 
-import feign.Body;
 import feign.Response;
 
 public class RestApiServerException extends RuntimeException {
