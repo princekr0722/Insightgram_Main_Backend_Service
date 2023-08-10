@@ -12,7 +12,7 @@ Built on cutting-edge technologies and best practices, Insightgram Main Backend 
 ## Aim of the Project
 
 The primary aim of this project is to create a feature-rich and interactive social media platform that connects people in a seamless and engaging manner. By harnessing the power of Core Java technologies and modern web development tools, the project demonstrates my expertise in building scalable, reliable, and user-friendly applications. Through Insightgram, I aim to provide users with an exceptional experience, fostering connections and interactions in a dynamic online environment.
-This application is build by me in a span of 2 months (not continuously).
+Entire Insightgram is build by me in a span of 2 months (not continuously).
 
 
 ## 🧑🏻‍💻 API Documentation
