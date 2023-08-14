@@ -63,7 +63,7 @@ These technologies collectively contribute to Insightgram's performance, securit
 
 Thank you for taking the time to explore Insightgram. Your feedback and engagement are greatly appreciated. Feel free to reach out to me with any questions or suggestions – I'm excited to continue refining and expanding this project. Here's to a brighter, more connected digital world with Insightgram!
 
-Deployed app link: [https://classy-sherbet-63a565.netlify.app](https://classy-sherbet-63a565.netlify.app)
+Deployed app link: [https://insightgram.netlify.app/](https://insightgram.netlify.app/)
 
 Happy coding!
 
