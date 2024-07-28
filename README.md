@@ -38,7 +38,7 @@ Access `http://localhost:PORT_NUMBER/swagger-ui/index.html#/` to explore the API
 
 Highlighted component is the Main Backend Service.
 
-## All Services
+## 🗂️ All Services
 
 - Main Service: https://github.com/princekr0722/Insightgram_Main_Backend_Service
 - Messaging Service: https://github.com/princekr0722/Insightgram_Messaging_Service
